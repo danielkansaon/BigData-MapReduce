@@ -1,4 +1,4 @@
-#Daniel Pimentel e Diogo Aguilar
+#Nomes: Daniel Pimentel e Diogo Aguilar
 from stopwords import allStopWords
 import mincemeat  
 import codecs
@@ -6,6 +6,7 @@ import glob
 import csv
 import os
 
+#Global
 path_data = os.path.join(os.path.dirname(os.path.realpath(__file__)), "files")
 text_files = os.listdir(path_data)
 
@@ -30,29 +31,41 @@ def mapfn(k, v):
                     if word not in allStopWords.keys():                        
                         yield (author, word)
 
-
 def reducefn(k, v):
     print('reduce ' + k)
     return sum(v)  
 
-s = mincemeat.Server()
+def print_commum_words(results, author):
+    amount = [value for value in results[author].values()]
+    amount.sort()
+    max_values = amount[-2:]
+    count = 0
 
-s.datasource = datasource
-s.mapfn = mapfn
-s.reducefn = reducefn
+    for v in max_values:
+        print(author[0])
+        print(str(count)  + ' - ' + v)
+        count = count + 1
 
-results = s.run_server(password='changeme')
-w = csv.writer(open(os.path.dirname(os.path.realpath(__file__)) +  "\\result.csv", "w"))
+def main():
+    s = mincemeat.Server()
+    s.datasource = datasource
+    s.mapfn = mapfn
+    s.reducefn = reducefn
 
-all_author = [all_author for all_author in results.keys()]
+    results = s.run_server(password='changeme')
+    w = csv.writer(open(os.path.dirname(os.path.realpath(__file__)) +  "\\result.csv", "w"))
 
-for author in all_author:
-    if author in results.keys():
-        for k, v in results[author].items():
-            w.write("\"{}\";\"{}\";\"{}\"\n".format(author, k, v))
-    
-        amount = [value for value in results[author].values()]
-        amount.sort()
-        max_values = amount[-2:]
+    all_author = [all_author for all_author in results.keys()]
 
-w.close()   
+    for a in all_author:
+        if a in a.keys():
+            for k, v in results[a].items():
+                w.write("\"{}\";\"{}\";\"{}\"\n".format(a, k, v)) # writing in result.csv    
+
+        if a[0] == "Grzegorz Rozenberg" or a[0] == "Philip S. Yu":
+            print_commum_words(results, a)
+
+    w.close()   
+
+if __name__ == "__main__":
+    main()
